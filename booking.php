@@ -1,59 +1,166 @@
 <?php include 'config.php'; ?>
 <?php include 'navbar.php'; ?>
 
-<div class="container mt-4">
-    <div class="card p-4 shadow">
-        <h3 class="text-center text-primary mb-3">Đặt phòng</h3>
+<style>
+    /* 🌌 nền */
+    body {
+        background: linear-gradient(135deg, #141e30, #243b55);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* 🧊 card */
+    .card {
+        background: rgba(173, 216, 230, 0.6);
+        backdrop-filter: blur(12px);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        transition: 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 🧾 input */
+    .form-control {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        border: none;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 10px #00c6ff;
+        transform: scale(1.02);
+    }
+
+    /* icon */
+    .input-group-text {
+        background: #0d6efd;
+        color: white;
+        border: none;
+    }
+
+    /* button */
+    .btn-success {
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        border: none;
+        font-weight: bold;
+    }
+
+    .btn-success:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #00c6ff;
+    }
+
+    /* preview */
+    #preview .alert {
+        background: rgba(13, 202, 240, 0.9);
+        color: black;
+    }
+
+    /* suggest */
+    #suggest .alert {
+        background: rgba(25, 135, 84, 0.9);
+    }
+
+    /* calendar */
+    #calendarBox {
+        background: white;
+        color: black;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    /* animation */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="card p-4 shadow-lg fade-in">
+        <h3 class="text-center fw-bold mb-4 text-info">🚀 Đặt phòng </h3>
 
         <form id="form" novalidate>
 
-            <input name="user_name" class="form-control mb-2" placeholder="Tên người đặt" required>
+            <div class="input-group mb-2">
+                <span class="input-group-text">👤</span>
+                <input name="user_name" class="form-control" placeholder="Tên người đặt" required>
+            </div>
 
-            <select name="room" id="room" class="form-control mb-2" required>
-                <?php
-                $res = mysqli_query($conn, "SELECT * FROM rooms");
-                while ($r = mysqli_fetch_assoc($res)) {
-                    echo "<option value='{$r['id']}' data-cap='{$r['capacity']}'>
-                            {$r['name']} (Tối đa {$r['capacity']} người)
-                          </option>";
-                }
-                ?>
-            </select>
+            <div class="input-group mb-2">
+                <span class="input-group-text">🏫</span>
+                <select name="room" id="room" class="form-control" required>
+                    <?php
+                    $res = mysqli_query($conn, "SELECT * FROM rooms");
+                    while ($r = mysqli_fetch_assoc($res)) {
+                        echo "<option value='{$r['id']}' data-cap='{$r['capacity']}'>
+                                {$r['name']} (Tối đa {$r['capacity']} người)
+                              </option>";
+                    }
+                    ?>
+                </select>
+            </div>
 
-            <input type="number" name="students" id="students" class="form-control mb-2" placeholder="Số lượng người" required>
+            <div class="input-group mb-2">
+                <span class="input-group-text">👥</span>
+                <input type="number" name="students" id="students" class="form-control" placeholder="Số lượng người" required>
+            </div>
 
-            <select name="purpose" class="form-control mb-2" required>
-                <option value="">-- Chọn mục đích --</option>
-                <option value="Học">Học</option>
-                <option value="Thi">Thi</option>
-                <option value="Họp">Họp</option>
-            </select>
+            <div class="input-group mb-2">
+                <span class="input-group-text">🎯</span>
+                <select name="purpose" class="form-control" required>
+                    <option value="">-- Chọn mục đích --</option>
+                    <option value="Học">Học</option>
+                    <option value="Thi">Thi</option>
+                    <option value="Họp">Họp</option>
+                </select>
+            </div>
 
-            <input type="date" name="date" id="date" class="form-control mb-2" required>
-            <input type="time" name="start" id="start" class="form-control mb-2" required>
-            <input type="time" name="end" id="end" class="form-control mb-2" required>
+            <div class="input-group mb-2">
+                <span class="input-group-text">📅</span>
+                <input type="date" name="date" id="date" class="form-control" required>
+            </div>
 
-            <textarea name="note" class="form-control mb-2" placeholder="Ghi chú"></textarea>
+            <div class="row">
+                <div class="col">
+                    <input type="time" name="start" id="start" class="form-control mb-2" required>
+                </div>
+                <div class="col">
+                    <input type="time" name="end" id="end" class="form-control mb-2" required>
+                </div>
+            </div>
 
-            <button type="submit" class="btn btn-success w-100">Đặt phòng</button>
+            <textarea name="note" class="form-control mb-3" placeholder="Ghi chú"></textarea>
+
+            <button type="submit" class="btn btn-success w-100">🚀 Đặt phòng</button>
         </form>
 
-        <!-- Hiển thị thông tin bên dưới -->
         <div id="preview" class="mt-3" style="display:none;">
-            <div class="alert alert-info">
+            <div class="alert fade-in">
                 📌 <b>Thông tin:</b><br>
                 Phòng: <span id="p_room"></span><br>
                 Thời gian: <span id="p_time"></span><br>
-                ⏱ Thời lượng: <span id="p_duration" class="badge bg-success"></span>
+                ⏱ Thời lượng: <span id="p_duration" class="badge bg-dark"></span>
             </div>
         </div>
 
-        <!--  GỢI Ý PHÒNG -->
         <div id="suggest" class="mt-2"></div>
-
-        <!-- LỊCH đang hoạt đông ngày đó calendar_ajax.php -->
         <div id="calendarBox" class="mt-3"></div>
-
         <div id="msg"></div>
     </div>
 </div>
@@ -61,7 +168,6 @@
 <script>
     let form = document.getElementById("form");
     let btn = form.querySelector("button");
-
 
     document.querySelectorAll("#form input, #form select").forEach(el => {
         el.addEventListener("change", showPreview);
@@ -86,7 +192,6 @@
         document.getElementById("p_duration").innerText = hours + " giờ";
     }
 
-    // ===== dùng AI gợi ý đặt phòng nếu sức chứa nhập không đủ =====
     document.getElementById("students").addEventListener("input", function() {
         let students = this.value;
         let room = document.getElementById("room");
@@ -104,7 +209,6 @@
             best ? `<div class="alert alert-success">💡 Gợi ý: ${best}</div>` : "";
     });
 
-    // ===== LOAD LỊCH (AJAX) =====
     document.getElementById("date").addEventListener("change", function() {
         fetch("calendar_ajax.php?date=" + this.value)
             .then(r => r.text())
@@ -113,7 +217,6 @@
             });
     });
 
-    // ===== SUBMIT =====
     form.onsubmit = function(e) {
         e.preventDefault();
 
@@ -125,7 +228,9 @@
         let capacity = parseInt(room.options[room.selectedIndex].dataset.cap) || 0;
 
         let now = new Date();
-        let today = now.toISOString().split('T')[0];
+        let today = now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, '0') + "-" +
+            String(now.getDate()).padStart(2, '0');
 
         if (!data.get("user_name")) errors.push("Chưa nhập tên");
         if (!data.get("date")) errors.push("Chưa chọn ngày");
@@ -133,13 +238,9 @@
         if (!data.get("end")) errors.push("Chưa chọn giờ kết thúc");
 
         if (students > capacity) errors.push("Phòng không đủ sức chứa!");
-
         if (data.get("date") < today) errors.push("Ngày không hợp lệ");
+        if (data.get("start") >= data.get("end")) errors.push("Giờ sai");
 
-        if (data.get("start") >= data.get("end"))
-            errors.push("Giờ sai");
-
-        // giới hạn 12h
         let t1 = new Date("1970-01-01T" + data.get("start"));
         let t2 = new Date("1970-01-01T" + data.get("end"));
         let hours = (t2 - t1) / (1000 * 60 * 60);
@@ -151,7 +252,6 @@
             return;
         }
 
-        // check trùng lịch
         fetch("check_booking.php", {
                 method: "POST",
                 body: data
@@ -163,7 +263,6 @@
                     return;
                 }
 
-                // disable nút
                 btn.disabled = true;
                 btn.innerText = "Đang xử lý...";
 
