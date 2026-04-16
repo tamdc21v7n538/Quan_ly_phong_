@@ -64,72 +64,189 @@ if (isset($_GET['delete'])) {
     exit;
 }
 ?>
+<style>
+    body {
+        background-color: #1f2937;
+        color: #ffffff;
+    }
+
+    /* card nền trắng cho dễ đọc */
+    .card {
+        background-color: #ffffff;
+        color: #ffffff;
+        border: 1px solid #ffffff;
+    }
+
+    /* input form */
+    input {
+        background-color: #ffffff !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+    }
+
+    input::placeholder {
+        color: #aaa !important;
+    }
+
+    /* table */
+    table {
+        color: #fff;
+    }
+
+    .table-bordered td,
+    .table-bordered th {
+        border-color: #444 !important;
+    }
+
+    /* header bảng */
+    .table-success {
+        background-color: #198754 !important;
+        color: white !important;
+    }
+
+    .table-warning {
+        background-color: #ffc107 !important;
+        color: black !important;
+    }
+
+    /* nút */
+    .btn-danger {
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    }
+
+    .btn-success {
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+    }
+
+    .btn-primary {
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    }
+
+    /* tiêu đề */
+    h2,
+    h4,
+    h5 {
+        color: #ffffff;
+    }
+</style>
 
 <div class="container mt-4">
-    <h3>Quản lý phòng</h3>
 
-    <form method="POST" class="mb-3">
-        <input name="name" class="form-control mb-2" placeholder="Tên phòng">
-        <input name="capacity" class="form-control mb-2" placeholder="Sức chứa">
-        <button name="add" class="btn btn-primary">Thêm</button>
-    </form>
+    <!-- ===== TIÊU ĐỀ ===== -->
+    <h2 class="text-center mb-4 fw-bold text-primary">
+        Quản lý phòng
+    </h2>
 
+    <!-- khoảng cách -->
+    <div class="mb-4"></div>
 
-    <table class="table table-bordered">
-        <tr>
-            <th>STT</th>
-            <th>Phòng</th>
-            <th>Sức chứa</th>
-            <th>Hành động</th>
-        </tr>
+    <!-- ===== FORM THÊM PHÒNG ===== -->
+    <div class="d-flex justify-content-center align-items-center gap-4 mb-4">
 
-        <?php
-        $stt = 1;
-        $res = mysqli_query($conn, "SELECT * FROM rooms");
+        <!-- ICON TRÁI -->
+        <div class="d-none d-md-block text-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="100">
+        </div>
 
-        while ($row = mysqli_fetch_assoc($res)) {
-            echo "<tr>
-        <td>" . $stt++ . "</td>
-        <td>{$row['name']}</td>
-        <td>{$row['capacity']}</td>
-        <td>
-            <a href='rooms.php?delete={$row['id']}' 
-               class='btn btn-danger btn-sm'
-               onclick='return confirm(\"Xóa phòng này?\")'>
-               Xóa
-            </a>
-        </td>
-    </tr>";
-        }
-        ?>
-    </table>
-    <hr>
-    <div id="historyBox" style="display:none;">
-        <h4>Lịch sử thêm / xóa phòng</h4>
+        <!-- FORM -->
+        <div class="card shadow p-4" style="max-width:500px; width:100%; border-radius:15px;">
+            <h4 class="text-center text-success mb-3">
+                Thêm phòng học
+            </h4>
 
-        <table class="table table-striped">
-            <tr>
-                <th>Hành động</th>
+            <form method="POST">
+                <input name="name" class="form-control mb-2 text-primary" placeholder="Tên phòng">
+                <input name="capacity" class="form-control mb-3 text-primary" placeholder="Sức chứa">
+
+                <button name="add" class="btn btn-success w-100">
+                    ➕ Thêm
+                </button>
+            </form>
+        </div>
+
+        <!-- ICON PHẢI -->
+        <div class="d-none d-md-block text-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" width="100">
+        </div>
+
+    </div>
+
+    <!-- ===== BẢNG DANH SÁCH ===== -->
+    <h4 class="text-center text-white bg-primary p-2 rounded">
+        Danh sách phòng
+    </h4>
+
+    <div class="card shadow p-3 mb-3">
+
+        <table class="table table-bordered text-center align-middle">
+            <tr class="table-success">
+                <th>STT</th>
                 <th>Phòng</th>
-                <th>Thời gian</th>
+                <th>Sức chứa</th>
+                <th>Hành động</th>
             </tr>
 
             <?php
-            $logs = mysqli_query($conn, "SELECT * FROM room_logs ORDER BY id DESC");
+            $stt = 1;
+            $res = mysqli_query($conn, "SELECT * FROM rooms");
 
-            while ($log = mysqli_fetch_assoc($logs)) {
+            while ($row = mysqli_fetch_assoc($res)) {
                 echo "<tr>
-        <td>{$log['action']}</td>
-        <td>{$log['room_name']}</td>
-        <td>{$log['created_at']}</td>
-    </tr>";
+                    <td>{$stt}</td>
+                    <td>{$row['name']}</td>
+                    <td>{$row['capacity']}</td>
+                    <td>
+                        <a href='rooms.php?delete={$row['id']}'
+                           class='btn btn-danger btn-sm'
+                           onclick='return confirm(\"Xóa phòng này?\")'>
+                           Xóa
+                        </a>
+                    </td>
+                </tr>";
+                $stt++;
             }
             ?>
         </table>
     </div>
-    <button type="button" class="btn btn-info mb-3" onclick="toggleHistory()">
-        📜 Ẩn/Hiện lịch sử thêm/xóa phòng
-    </button>
+
+    <!-- ===== NÚT LỊCH SỬ ===== -->
+    <div class="text-center mb-3">
+        <button type="button" class="btn btn-primary" onclick="toggleHistory()">
+            📜 Ẩn/Hiện lịch sử thêm/xóa phòng
+        </button>
+    </div>
+
+    <!-- ===== LỊCH SỬ ===== -->
+    <div id="historyBox" style="display:none;">
+
+        <div class="card shadow p-3">
+
+            <h5 class="text-center text-secondary mb-3">
+                Lịch sử hoạt động
+            </h5>
+
+            <table class="table table-striped text-center">
+                <tr class="table-warning">
+                    <th>Hành động</th>
+                    <th>Phòng</th>
+                    <th>Thời gian</th>
+                </tr>
+
+                <?php
+                $logs = mysqli_query($conn, "SELECT * FROM room_logs ORDER BY id DESC");
+
+                while ($log = mysqli_fetch_assoc($logs)) {
+                    echo "<tr>
+                        <td>{$log['action']}</td>
+                        <td>{$log['room_name']}</td>
+                        <td>{$log['created_at']}</td>
+                    </tr>";
+                }
+                ?>
+            </table>
+        </div>
+    </div>
+
 </div>
 <script>
     function toggleHistory() {
