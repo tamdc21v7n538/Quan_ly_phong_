@@ -163,6 +163,40 @@
         <div id="calendarBox" class="mt-3"></div>
         <div id="msg"></div>
     </div>
+    <!-- ===== NÚT ẨN/HIỆN LỊCH SỬ ===== -->
+    <div class="text-center mt-4">
+        <button class="btn btn-warning" onclick="toggleHistory()">
+            📜 Xem lịch sử đặt phòng
+        </button>
+    </div>
+
+    <!-- ===== KHUNG LỊCH SỬ ===== -->
+    <div id="historyBox" style="display:none;" class="mt-4">
+
+        <!-- bộ lọc -->
+        <div class="row mb-3">
+            <div class="col">
+                <input type="date" id="filterDate" class="form-control">
+            </div>
+            <div class="col">
+                <input type="text" id="searchName" class="form-control" placeholder="Tên người đặt">
+            </div>
+            <div class="col">
+                <input type="text" id="searchRoom" class="form-control" placeholder="Tên phòng">
+            </div>
+            <div class="col">
+                <button class="btn btn-primary w-100" onclick="loadHistory(1)">
+                    🔍 Lọc
+                </button>
+            </div>
+        </div>
+
+        <!-- bảng -->
+        <div id="historyTable"></div>
+
+        <!-- phân trang -->
+        <div id="pagination" class="text-center mt-2"></div>
+    </div>
 </div>
 
 <script>
@@ -286,4 +320,50 @@
         document.getElementById("msg").innerHTML =
             `<div class="alert alert-${type} mt-2">${msg}</div>`;
     }
+    // ===== ẨN / HIỆN =====
+    function toggleHistory() {
+        let box = document.getElementById("historyBox");
+
+        if (box.style.display === "none") {
+            box.style.display = "block";
+
+            // 👉 mở là load luôn (không cần lọc)
+            loadHistory(1);
+
+        } else {
+            box.style.display = "none";
+        }
+    }
+
+    // ===== LOAD LỊCH SỬ =====
+    function loadHistory(page) {
+
+        let date = document.getElementById("filterDate").value;
+        let name = document.getElementById("searchName").value;
+        let room = document.getElementById("searchRoom").value;
+
+        fetch("history_ajax.php?page=" + page +
+                "&date=" + date +
+                "&name=" + name +
+                "&room=" + room)
+            .then(r => r.text())
+            .then(d => {
+                document.getElementById("historyTable").innerHTML = d;
+            });
+
+        //Thêm date name room cho phân trang không lặp dữ liệu
+        fetch("history_page.php?page=" + page +
+                "&date=" + date +
+                "&name=" + name +
+                "&room=" + room)
+            .then(r => r.text())
+            .then(d => {
+                document.getElementById("pagination").innerHTML = d;
+            });
+    }
+
+    //Lọc
+    document.getElementById("filterDate").oninput = () => loadHistory(1);
+    document.getElementById("searchName").oninput = () => loadHistory(1);
+    document.getElementById("searchRoom").oninput = () => loadHistory(1);
 </script>
