@@ -1,0 +1,145 @@
+<?php
+include 'config.php';
+include 'session.php';
+
+// ===== KIỂM TRA LOGIN =====
+if (!isset($_SESSION['user'])) {
+    header("location: login.php");
+    exit;
+}
+
+// ===== KIỂM TRA QUYỀN =====
+if ($_SESSION['role'] != 'admin') {
+    die("❌ Không có quyền!");
+}
+
+// ===== XỬ LÝ FORM =====
+if (isset($_POST['register'])) {
+
+    $email = safe($_POST['email']);
+    $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role = $_POST['role'];
+
+    // kiểm tra email
+    $check = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'");
+
+    if (mysqli_num_rows($check) > 0) {
+        header("Location: register.php?error=exists");
+        exit;
+    }
+
+    // thêm user
+    $result = mysqli_query($conn, "
+        INSERT INTO users(email,password,role) 
+        VALUES('$email','$pass','$role')
+    ");
+
+    if ($result) {
+        header("Location: register.php?success=1");
+        exit;
+    } else {
+        header("Location: register.php?error=db");
+        exit;
+    }
+}
+
+include 'navbar.php';
+?>
+<link rel="stylesheet" href="style.css">
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo tài khoản</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f1f3f6;
+        }
+
+        .card {
+            border-radius: 15px;
+        }
+
+        .title {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container mt-5 col-md-5">
+        <div class="card p-4 shadow">
+
+            <h3 class="text-center title mb-3">👤 Tạo tài khoản</h3>
+
+            <!-- THÔNG BÁO -->
+            <?php if (isset($_GET['success'])) { ?>
+                <div class="alert alert-success">✅ Tạo tài khoản thành công!</div>
+            <?php } ?>
+
+            <?php if (isset($_GET['error']) && $_GET['error'] == 'exists') { ?>
+                <div class="alert alert-danger">❌ Email đã tồn tại!</div>
+            <?php } ?>
+
+            <?php if (isset($_GET['error']) && $_GET['error'] == 'db') { ?>
+                <div class="alert alert-danger">❌ Lỗi database!</div>
+            <?php } ?>
+
+            <!-- FORM -->
+            <form method="POST" autocomplete="off">
+
+                <!-- EMAIL -->
+                <input
+                    name="email"
+                    class="form-control mb-2"
+                    placeholder="Email"
+                    autocomplete="off"
+                    required>
+
+                <!-- PASSWORD -->
+                <div class="input-group mb-2">
+                    <input
+                        name="password"
+                        type="password"
+                        id="pass"
+                        class="form-control"
+                        placeholder="Password"
+                        autocomplete="new-password"
+                        required>
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePass()">👁</button>
+                </div>
+
+                <!-- ROLE -->
+                <select name="role" class="form-control mb-3">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <!-- SUBMIT -->
+                <button name="register" class="btn btn-success w-100">
+                    Tạo tài khoản
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        // 👁 Hiện / ẩn mật khẩu
+        function togglePass() {
+            const p = document.getElementById("pass");
+            p.type = (p.type === "password") ? "text" : "password";
+        }
+    </script>
+
+</body>
+
+</html>

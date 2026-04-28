@@ -1,0 +1,123 @@
+
+/*  nền */
+body {
+    background: #051631;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 90px;
+           
+}
+
+/* card */
+.card {
+    background: #e9ecef;
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 🧾 input */
+.form-control {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    border: none;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 10px #00c6ff;
+    transform: scale(1.02);
+}
+
+/* icon */
+.input-group-text {
+    background: #0d6efd;
+    color: white;
+    border: none;
+}
+
+/* button */
+.btn-success {
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+    border: none;
+    font-weight: bold;
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #00c6ff;
+}
+
+/* preview */
+#preview .alert {
+    background: rgba(13, 202, 240, 0.9);
+    color: black;
+}
+
+/* suggest */
+#suggest .alert {
+    background: rgba(25, 135, 84, 0.9);
+}
+
+/* calendar */
+#calendarBox {
+    background: white;
+    color: black;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* animation */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tiêu đề chính */
+.main-title {
+    color: #0d6efd;
+    font-weight: bold;
+}
+/**nền trắngcho biểu đồ*/
+.chart-box {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+canvas {
+    max-height: 500px;
+}
+/*login*/
+
+/* chỉnh kích thước form login */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.login-card {
+    width: 100%;
+    max-width: 360px;
+    /* nhỏ lại */
+    padding: 25px;
+}

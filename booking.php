@@ -1,106 +1,33 @@
 <?php include 'config.php'; ?>
 <?php include 'navbar.php'; ?>
 
-<style>
-    /* 🌌 nền */
-    body {
-        background: linear-gradient(135deg, #141e30, #243b55);
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    /* 🧊 card */
-    .card {
-        background: rgba(173, 216, 230, 0.6);
-        backdrop-filter: blur(12px);
-        border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        transition: 0.3s;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    /* 🧾 input */
-    .form-control {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 8px;
-        border: none;
-    }
-
-    .form-control:focus {
-        box-shadow: 0 0 10px #00c6ff;
-        transform: scale(1.02);
-    }
-
-    /* icon */
-    .input-group-text {
-        background: #0d6efd;
-        color: white;
-        border: none;
-    }
-
-    /* button */
-    .btn-success {
-        background: linear-gradient(45deg, #00c6ff, #0072ff);
-        border: none;
-        font-weight: bold;
-    }
-
-    .btn-success:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px #00c6ff;
-    }
-
-    /* preview */
-    #preview .alert {
-        background: rgba(13, 202, 240, 0.9);
-        color: black;
-    }
-
-    /* suggest */
-    #suggest .alert {
-        background: rgba(25, 135, 84, 0.9);
-    }
-
-    /* calendar */
-    #calendarBox {
-        background: white;
-        color: black;
-        border-radius: 10px;
-        padding: 10px;
-    }
-
-    /* animation */
-    .fade-in {
-        animation: fadeIn 0.5s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
+<link rel="stylesheet" href="style.css">
 
 <div class="container mt-5">
     <div class="card p-4 shadow-lg fade-in">
         <h3 class="text-center fw-bold mb-4 text-info">🚀 Đặt phòng </h3>
 
-        <form id="form" novalidate>
+        <form id="form" method="POST" novalidate>
 
             <div class="input-group mb-2">
                 <span class="input-group-text">👤</span>
                 <input name="user_name" class="form-control" placeholder="Tên người đặt" required>
             </div>
+
+            <div class="input-group mb-2">
+                <span class="input-group-text">🏷️</span>
+                <input list="classList" name="class" id="class" class="form-control" placeholder="Nhập hoặc chọn lớp" required>
+
+                <datalist id="classList">
+                    <?php
+                    $resClass = mysqli_query($conn, "SELECT DISTINCT class FROM bookings WHERE class IS NOT NULL AND class != ''");
+                    while ($c = mysqli_fetch_assoc($resClass)) {
+                        echo "<option value='{$c['class']}'>";
+                    }
+                    ?>
+                </datalist>
+            </div>
+
 
             <div class="input-group mb-2">
                 <span class="input-group-text">🏫</span>

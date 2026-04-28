@@ -21,7 +21,7 @@ if (isset($_POST['add'])) {
     $name = trim($_POST['name']);
     $capacity = trim($_POST['capacity']);
 
-    // ❌ kiểm tra rỗng
+    //  kiểm tra rỗng
     if ($name == "" || $capacity == "") {
         echo "<script>
             alert('Vui lòng nhập đầy đủ tên phòng và sức chứa!');
@@ -30,7 +30,7 @@ if (isset($_POST['add'])) {
         exit;
     }
 
-    // ❌ kiểm tra số hợp lệ
+    //  kiểm tra số hợp lệ
     if (!is_numeric($capacity)) {
         echo "<script>
             alert('Sức chứa phải là số!');
@@ -64,71 +64,7 @@ if (isset($_GET['delete'])) {
     exit;
 }
 ?>
-<style>
-    body {
-        background-color: #1f2937;
-        color: #ffffff;
-    }
-
-    /* card nền trắng cho dễ đọc */
-    .card {
-        background-color: #ffffff;
-        color: #ffffff;
-        border: 1px solid #ffffff;
-    }
-
-    /* input form */
-    input {
-        background-color: #ffffff !important;
-        color: #fff !important;
-        border: 1px solid #444 !important;
-    }
-
-    input::placeholder {
-        color: #aaa !important;
-    }
-
-    /* table */
-    table {
-        color: #fff;
-    }
-
-    .table-bordered td,
-    .table-bordered th {
-        border-color: #444 !important;
-    }
-
-    /* header bảng */
-    .table-success {
-        background-color: #198754 !important;
-        color: white !important;
-    }
-
-    .table-warning {
-        background-color: #ffc107 !important;
-        color: black !important;
-    }
-
-    /* nút */
-    .btn-danger {
-        box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
-    }
-
-    .btn-success {
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
-    }
-
-    .btn-primary {
-        box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
-    }
-
-    /* tiêu đề */
-    h2,
-    h4,
-    h5 {
-        color: #ffffff;
-    }
-</style>
+<link rel="stylesheet" href="style.css">
 
 <div class="container mt-4">
 
