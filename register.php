@@ -20,7 +20,10 @@ if (isset($_POST['register'])) {
     $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = $_POST['role'];
 
-    // kiểm tra email
+    // 👉 class chỉ cần khi là user
+    $class = isset($_POST['class']) ? safe($_POST['class']) : '';
+
+    // ===== CHECK EMAIL =====
     $check = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'");
 
     if (mysqli_num_rows($check) > 0) {
@@ -28,11 +31,38 @@ if (isset($_POST['register'])) {
         exit;
     }
 
-    // thêm user
-    $result = mysqli_query($conn, "
-        INSERT INTO users(email,password,role) 
-        VALUES('$email','$pass','$role')
-    ");
+    // ===== NẾU USER → CHECK LỚP =====
+    if ($role == 'user') {
+
+        if (empty($class)) {
+            header("Location: register.php?error=noclass");
+            exit;
+        }
+
+        $checkClass = mysqli_query($conn, "
+            SELECT DISTINCT class 
+            FROM bookings 
+            WHERE class = '$class'
+        ");
+
+        if (mysqli_num_rows($checkClass) == 0) {
+            header("Location: register.php?error=invalidclass");
+            exit;
+        }
+
+        // INSERT USER + CLASS
+        $result = mysqli_query($conn, "
+            INSERT INTO users(email,password,role,class) 
+            VALUES('$email','$pass','$role','$class')
+        ");
+    } else {
+
+        // 👉 ADMIN KHÔNG CẦN CLASS
+        $result = mysqli_query($conn, "
+            INSERT INTO users(email,password,role) 
+            VALUES('$email','$pass','$role')
+        ");
+    }
 
     if ($result) {
         header("Location: register.php?success=1");
@@ -45,7 +75,9 @@ if (isset($_POST['register'])) {
 
 include 'navbar.php';
 ?>
+
 <link rel="stylesheet" href="style.css">
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -53,7 +85,6 @@ include 'navbar.php';
     <meta charset="UTF-8">
     <title>Tạo tài khoản</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -88,6 +119,14 @@ include 'navbar.php';
                 <div class="alert alert-danger">❌ Email đã tồn tại!</div>
             <?php } ?>
 
+            <?php if (isset($_GET['error']) && $_GET['error'] == 'noclass') { ?>
+                <div class="alert alert-danger">❌ Chưa chọn lớp!</div>
+            <?php } ?>
+
+            <?php if (isset($_GET['error']) && $_GET['error'] == 'invalidclass') { ?>
+                <div class="alert alert-danger">❌ Lớp không tồn tại!</div>
+            <?php } ?>
+
             <?php if (isset($_GET['error']) && $_GET['error'] == 'db') { ?>
                 <div class="alert alert-danger">❌ Lỗi database!</div>
             <?php } ?>
@@ -96,33 +135,36 @@ include 'navbar.php';
             <form method="POST" autocomplete="off">
 
                 <!-- EMAIL -->
-                <input
-                    name="email"
-                    class="form-control mb-2"
-                    placeholder="Email"
-                    autocomplete="off"
-                    required>
+                <input name="email" class="form-control mb-2" placeholder="Email" required>
 
                 <!-- PASSWORD -->
                 <div class="input-group mb-2">
-                    <input
-                        name="password"
-                        type="password"
-                        id="pass"
-                        class="form-control"
-                        placeholder="Password"
-                        autocomplete="new-password"
-                        required>
+                    <input name="password" type="password" id="pass"
+                        class="form-control" placeholder="Password" required>
                     <button type="button" class="btn btn-outline-secondary" onclick="togglePass()">👁</button>
                 </div>
 
                 <!-- ROLE -->
-                <select name="role" class="form-control mb-3">
+                <select name="role" id="role" class="form-control mb-2">
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
 
-                <!-- SUBMIT -->
+                <!-- ===== CHỌN LỚP (ẨN BAN ĐẦU) ===== -->
+                <select name="class" id="classBox" class="form-control mb-3" style="display:none;">
+                    <option value="">-- Chọn lớp --</option>
+                    <?php
+                    $classes = mysqli_query($conn, "
+                    SELECT DISTINCT class 
+                    FROM bookings 
+                    WHERE class IS NOT NULL AND class != ''
+                ");
+                    while ($c = mysqli_fetch_assoc($classes)) {
+                        echo "<option value='{$c['class']}'>{$c['class']}</option>";
+                    }
+                    ?>
+                </select>
+
                 <button name="register" class="btn btn-success w-100">
                     Tạo tài khoản
                 </button>
@@ -133,10 +175,28 @@ include 'navbar.php';
     </div>
 
     <script>
-        // 👁 Hiện / ẩn mật khẩu
+        // 👁 show/hide pass
         function togglePass() {
             const p = document.getElementById("pass");
             p.type = (p.type === "password") ? "text" : "password";
+        }
+
+        // 🔥 HIỆN CLASS KHI CHỌN USER
+        const role = document.getElementById("role");
+        const classBox = document.getElementById("classBox");
+
+        role.addEventListener("change", function() {
+            if (this.value === "user") {
+                classBox.style.display = "block";
+            } else {
+                classBox.style.display = "none";
+                classBox.value = "";
+            }
+        });
+
+        // load lần đầu
+        if (role.value === "user") {
+            classBox.style.display = "block";
         }
     </script>
 

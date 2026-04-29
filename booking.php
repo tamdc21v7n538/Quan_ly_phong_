@@ -28,14 +28,31 @@
                 </datalist>
             </div>
 
+            <!-- ===== CHỌN DÃY (THÊM) ===== -->
+            <div class="input-group mb-2">
+                <span class="input-group-text">🏢</span>
+                <select id="building" class="form-control">
+                    <option value="">-- Chọn dãy --</option>
+                    <?php
+                    $b = mysqli_query($conn, "SELECT * FROM buildings");
+                    while ($row = mysqli_fetch_assoc($b)) {
+                        echo "<option value='{$row['id']}'>{$row['name']}</option>";
+                    }
+                    ?>
+                </select>
+            </div>
 
+            <!-- ===== PHÒNG (GIỮ NGUYÊN + THÊM data-building) ===== -->
             <div class="input-group mb-2">
                 <span class="input-group-text">🏫</span>
-                <select name="room" id="room" class="form-control" required>
+                <select name="room" id="room" class="form-control" required disabled>
+                    <option value="">-- Chọn dãy trước --</option>
                     <?php
                     $res = mysqli_query($conn, "SELECT * FROM rooms");
                     while ($r = mysqli_fetch_assoc($res)) {
-                        echo "<option value='{$r['id']}' data-cap='{$r['capacity']}'>
+                        echo "<option value='{$r['id']}' 
+                              data-cap='{$r['capacity']}'
+                              data-building='{$r['building_id']}'>
                                 {$r['name']} (Tối đa {$r['capacity']} người)
                               </option>";
                     }
@@ -90,17 +107,16 @@
         <div id="calendarBox" class="mt-3"></div>
         <div id="msg"></div>
     </div>
-    <!-- ===== NÚT ẨN/HIỆN LỊCH SỬ ===== -->
+
+    <!-- ===== LỊCH SỬ (GIỮ NGUYÊN) ===== -->
     <div class="text-center mt-4">
         <button class="btn btn-warning" onclick="toggleHistory()">
             📜 Xem lịch sử đặt phòng
         </button>
     </div>
 
-    <!-- ===== KHUNG LỊCH SỬ ===== -->
     <div id="historyBox" style="display:none;" class="mt-4">
 
-        <!-- bộ lọc -->
         <div class="row mb-3">
             <div class="col">
                 <input type="date" id="filterDate" class="form-control">
@@ -118,10 +134,7 @@
             </div>
         </div>
 
-        <!-- bảng -->
         <div id="historyTable"></div>
-
-        <!-- phân trang -->
         <div id="pagination" class="text-center mt-2"></div>
     </div>
 </div>
@@ -129,36 +142,62 @@
 <script>
     let form = document.getElementById("form");
     let btn = form.querySelector("button");
+    let room = document.getElementById("room");
+    let building = document.getElementById("building");
+
+    // ===== CHỌN DÃY -> LỌC PHÒNG =====
+    building.addEventListener("change", function() {
+        let val = this.value;
+
+        room.disabled = !val;
+        room.value = "";
+
+        for (let opt of room.options) {
+            if (!opt.value) continue;
+
+            opt.style.display = (opt.dataset.building === val) ? "block" : "none";
+        }
+    });
 
     document.querySelectorAll("#form input, #form select").forEach(el => {
         el.addEventListener("change", showPreview);
     });
 
     function showPreview() {
-        let room = document.getElementById("room");
         let start = document.getElementById("start").value;
         let end = document.getElementById("end").value;
 
-        if (!start || !end) return;
+        if (!start || !end || !room.value) return;
 
         let roomName = room.options[room.selectedIndex].text;
 
         let t1 = new Date("1970-01-01T" + start);
         let t2 = new Date("1970-01-01T" + end);
-        let hours = (t2 - t1) / (1000 * 60 * 60);
+        let diff = (t2 - t1) / (1000 * 60); // phút
+        let h = Math.floor(diff / 60);
+        let m = diff % 60;
+
+        let text = "";
+        if (h > 0) text += h + " giờ ";
+        if (m > 0) text += m + " phút";
+
+        document.getElementById("p_duration").innerText = text.trim();
+
 
         document.getElementById("preview").style.display = "block";
         document.getElementById("p_room").innerText = roomName;
         document.getElementById("p_time").innerText = start + " → " + end;
-        document.getElementById("p_duration").innerText = hours + " giờ";
+
     }
 
+    // ===== GỢI Ý (KHÔNG PHÁ CODE) =====
     document.getElementById("students").addEventListener("input", function() {
         let students = this.value;
-        let room = document.getElementById("room");
-
         let best = "";
+
         for (let opt of room.options) {
+            if (opt.style.display === "none") continue;
+
             let cap = opt.dataset.cap;
             if (students <= cap) {
                 best = opt.text;
@@ -170,6 +209,7 @@
             best ? `<div class="alert alert-success">💡 Gợi ý: ${best}</div>` : "";
     });
 
+    // ===== GIỮ NGUYÊN TOÀN BỘ AJAX =====
     document.getElementById("date").addEventListener("change", function() {
         fetch("calendar_ajax.php?date=" + this.value)
             .then(r => r.text())
@@ -185,13 +225,10 @@
         let errors = [];
 
         let students = parseInt(data.get("students")) || 0;
-        let room = document.getElementById("room");
         let capacity = parseInt(room.options[room.selectedIndex].dataset.cap) || 0;
 
         let now = new Date();
-        let today = now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, '0') + "-" +
-            String(now.getDate()).padStart(2, '0');
+        let today = now.toISOString().split('T')[0];
 
         if (!data.get("user_name")) errors.push("Chưa nhập tên");
         if (!data.get("date")) errors.push("Chưa chọn ngày");
@@ -201,12 +238,6 @@
         if (students > capacity) errors.push("Phòng không đủ sức chứa!");
         if (data.get("date") < today) errors.push("Ngày không hợp lệ");
         if (data.get("start") >= data.get("end")) errors.push("Giờ sai");
-
-        let t1 = new Date("1970-01-01T" + data.get("start"));
-        let t2 = new Date("1970-01-01T" + data.get("end"));
-        let hours = (t2 - t1) / (1000 * 60 * 60);
-
-        if (hours > 12) errors.push("Không được đặt quá 12 giờ");
 
         if (errors.length > 0) {
             show(errors.join("<br>"), "danger");
@@ -235,10 +266,15 @@
                     .then(d => {
                         show("✅ " + d, "success");
                         form.reset();
-                        document.getElementById("preview").style.display = "none";
 
+                        document.getElementById("preview").style.display = "none";
                         btn.disabled = false;
                         btn.innerText = "Đặt phòng";
+
+                        // ✅ reload lại trang sau 3s (để user thấy thông báo)
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
                     });
             });
     }
@@ -247,49 +283,32 @@
         document.getElementById("msg").innerHTML =
             `<div class="alert alert-${type} mt-2">${msg}</div>`;
     }
-    // ===== ẨN / HIỆN =====
+
     function toggleHistory() {
         let box = document.getElementById("historyBox");
 
         if (box.style.display === "none") {
             box.style.display = "block";
-
-            // 👉 mở là load luôn (không cần lọc)
             loadHistory(1);
-
         } else {
             box.style.display = "none";
         }
     }
 
-    // ===== LOAD LỊCH SỬ =====
     function loadHistory(page) {
-
         let date = document.getElementById("filterDate").value;
         let name = document.getElementById("searchName").value;
         let room = document.getElementById("searchRoom").value;
 
-        fetch("history_ajax.php?page=" + page +
-                "&date=" + date +
-                "&name=" + name +
-                "&room=" + room)
+        fetch("history_ajax.php?page=" + page + "&date=" + date + "&name=" + name + "&room=" + room)
             .then(r => r.text())
-            .then(d => {
-                document.getElementById("historyTable").innerHTML = d;
-            });
+            .then(d => document.getElementById("historyTable").innerHTML = d);
 
-        //Thêm date name room cho phân trang không lặp dữ liệu
-        fetch("history_page.php?page=" + page +
-                "&date=" + date +
-                "&name=" + name +
-                "&room=" + room)
+        fetch("history_page.php?page=" + page + "&date=" + date + "&name=" + name + "&room=" + room)
             .then(r => r.text())
-            .then(d => {
-                document.getElementById("pagination").innerHTML = d;
-            });
+            .then(d => document.getElementById("pagination").innerHTML = d);
     }
 
-    //Lọc
     document.getElementById("filterDate").oninput = () => loadHistory(1);
     document.getElementById("searchName").oninput = () => loadHistory(1);
     document.getElementById("searchRoom").oninput = () => loadHistory(1);

@@ -34,9 +34,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <!-- ===== USER MENU ===== -->
             <?php if ($_SESSION['role'] == 'user') { ?>
-
-                <a href="view.php" class="btn btn-light <?= $currentPage == 'view.php' ? 'active' : ''; ?>">Xem dữ liệu</a>
-
+                <a href="dashboard.php" class="btn btn-light <?= $currentPage == 'dashboard.php' ? 'active' : ''; ?>">
+                    Trang chủ
+                </a>
             <?php } ?>
 
             <!-- ===== NOTIFICATION ===== -->

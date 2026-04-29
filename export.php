@@ -1,37 +1,49 @@
 <?php
 include 'config.php';
 
-// Xuất Excel
+// ===== LẤY FILTER DÃY =====
+$building = isset($_GET['building']) ? $_GET['building'] : '';
+
+// ===== EXPORT EXCEL =====
 header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 header("Content-Disposition: attachment; filename=booking_report.xls");
 
-// UTF-8 fix
+// fix UTF-8
 echo "\xEF\xBB\xBF";
 echo "<meta charset='UTF-8'>";
 
-// Tiêu đề
+// ===== TITLE =====
 echo "<h2 style='text-align:center;'>THỐNG KÊ ĐẶT PHÒNG</h2>";
 
-// Bảng
+// ===== TABLE HEADER =====
 echo "
 <table border='1' style='border-collapse:collapse; width:100%;'>
 <tr style='background:#d9d9d9; font-weight:bold; text-align:center;'>
-    <th style='text-align:center;'>ID</th>
-    <th style='text-align:center;'>Tên phòng</th>
-    <th style='text-align:center;'>Lớp</th>
-    <th style='text-align:center;'>Người đặt</th>
-    <th style='text-align:center;'>Ngày</th>
-    <th style='text-align:center;'>Thời gian</th>
-    <th style='text-align:center;'>Số SV</th>
-    <th style='text-align:center;'>Mục đích</th>
-    <th style='text-align:center;'>Trạng thái</th>
-    <th style='text-align:center;'>Ghi chú</th>
+    <th>ID</th>
+    <th>Tòa nhà</th>
+    <th>Tên phòng</th>
+    <th>Lớp</th>
+    <th>Người đặt</th>
+    <th>Ngày</th>
+    <th>Thời gian</th>
+    <th>Số SV</th>
+    <th>Mục đích</th>
+    <th>Trạng thái</th>
+    <th>Ghi chú</th>
 </tr>
 ";
 
-// Query
-$sql = "SELECT 
+// ===== WHERE =====
+$where = "";
+if ($building != "") {
+    $where = "WHERE rooms.building_id = '$building'";
+}
+
+// ===== QUERY (THÊM buildings) =====
+$sql = "
+SELECT 
     bookings.id,
+    buildings.name AS building_name,
     rooms.name AS room_name,
     bookings.class,
     bookings.user_name,
@@ -44,7 +56,10 @@ $sql = "SELECT
     bookings.note
 FROM bookings
 JOIN rooms ON bookings.room_id = rooms.id
-ORDER BY bookings.id ASC";
+LEFT JOIN buildings ON rooms.building_id = buildings.id
+$where
+ORDER BY bookings.id ASC
+";
 
 $result = mysqli_query($conn, $sql);
 
@@ -54,7 +69,7 @@ if (!$result) {
 
 $total = 0;
 
-// Data
+// ===== DATA =====
 while ($row = mysqli_fetch_assoc($result)) {
 
     $time = $row['time_start'] . " - " . $row['time_end'];
@@ -63,6 +78,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     echo "
     <tr>
         <td style='text-align:center;'>{$row['id']}</td>
+        <td style='text-align:center;'>{$row['building_name']}</td>
         <td style='text-align:center;'>{$row['room_name']}</td>
         <td style='text-align:center;'>{$row['class']}</td>
         <td style='text-align:center;'>{$row['user_name']}</td>
@@ -78,10 +94,10 @@ while ($row = mysqli_fetch_assoc($result)) {
     $total++;
 }
 
-// Tổng
+// ===== TOTAL =====
 echo "
 <tr style='font-weight:bold; background:#f2f2f2;'>
-    <td colspan='6' style='text-align:center;'>TỔNG SỐ LƯỢT ĐẶT</td>
+    <td colspan='7' style='text-align:center;'>TỔNG SỐ LƯỢT ĐẶT</td>
     <td colspan='4' style='text-align:center;'>{$total}</td>
 </tr>
 ";

@@ -2,7 +2,7 @@
 include 'config.php';
 
 /* =====================
-   PAGINATION
+   PAGINATION LỊCH SỬ ĐẶT PHÒNG
 ===================== */
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 10;
@@ -35,13 +35,15 @@ if ($room != "") {
 $whereSQL = count($where) > 0 ? implode(" AND ", $where) : "1";
 
 /* =====================
-   QUERY (ĐÃ FIX CLASS)
+   QUERY (THÊM BUILDING)
 ===================== */
 $sql = "SELECT 
             bookings.*,
-            rooms.name AS room_name
+            rooms.name AS room_name,
+            buildings.name AS building_name
         FROM bookings
         JOIN rooms ON bookings.room_id = rooms.id
+        LEFT JOIN buildings ON rooms.building_id = buildings.id
         WHERE $whereSQL
         ORDER BY bookings.id DESC
         LIMIT $start, $limit";
@@ -59,6 +61,7 @@ echo "<table class='table table-bordered text-center'>
 <tr class='table-dark'>
     <th>Người đặt</th>
     <th>Lớp</th>
+    <th>Tòa nhà</th>
     <th>Phòng</th>
     <th>Ngày</th>
     <th>Giờ</th>
@@ -74,6 +77,7 @@ while ($row = mysqli_fetch_assoc($res)) {
     echo "<tr>
         <td>{$row['user_name']}</td>
         <td>{$row['class']}</td>
+        <td>{$row['building_name']}</td>
         <td>{$row['room_name']}</td>
         <td>{$row['date']}</td>
         <td>{$row['time_start']} - {$row['time_end']}</td>

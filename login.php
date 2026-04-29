@@ -58,11 +58,7 @@ include 'session.php';
                     $_SESSION['user'] = $user['email'];
                     $_SESSION['role'] = $user['role'];
 
-                    if ($user['role'] == 'admin') {
-                        header("location: dashboard.php");
-                    } else {
-                        header("location: view.php");
-                    }
+                    header("location: dashboard.php");
                     exit();
                 } else {
                     echo "<div class='alert alert-danger mt-3 text-center'>Sai mật khẩu!</div>";
