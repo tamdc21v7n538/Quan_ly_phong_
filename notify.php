@@ -22,7 +22,6 @@ $sql = "
     JOIN rooms ON bookings.room_id = rooms.id
     LEFT JOIN buildings ON rooms.building_id = buildings.id
     ORDER BY bookings.id DESC
-    LIMIT 10
 ";
 
 $result = mysqli_query($conn, $sql);

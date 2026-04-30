@@ -248,9 +248,9 @@
                 method: "POST",
                 body: data
             })
-            .then(r => r.text())
-            .then(check => {
-                if (check == "exist") {
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === "exist") {
                     show("❌ Trùng lịch phòng!", "danger");
                     return;
                 }
