@@ -22,9 +22,9 @@ include 'session.php';
         <h3 class="text-center mb-3">🔐 Login</h3>
 
         <form method="POST">
-            <input name="email" class="form-control mb-3" placeholder="Email" required>
+            <input name="email" type="text" autocomplete="username" class="form-control mb-3" placeholder="Email" required value="">
 
-            <input name="password" type="password" class="form-control mb-2" placeholder="Password" required>
+            <input name="password" type="password" autocomplete="new-password" class="form-control mb-2" placeholder="Password" required value="">
 
             <!-- QUÊN MẬT KHẨU -->
             <div class="text-end mb-3">

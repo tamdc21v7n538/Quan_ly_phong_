@@ -135,12 +135,14 @@ include 'navbar.php';
             <form method="POST" autocomplete="off">
 
                 <!-- EMAIL -->
-                <input name="email" class="form-control mb-2" placeholder="Email" required>
+                <input name="email" type="text" autocomplete="username"
+                    class="form-control mb-2" placeholder="Email" required value="">
 
                 <!-- PASSWORD -->
                 <div class="input-group mb-2">
                     <input name="password" type="password" id="pass"
-                        class="form-control" placeholder="Password" required>
+                        autocomplete="new-password"
+                        class="form-control" placeholder="Password" required value="">
                     <button type="button" class="btn btn-outline-secondary" onclick="togglePass()">👁</button>
                 </div>
 

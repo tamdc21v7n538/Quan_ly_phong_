@@ -8,7 +8,9 @@ include 'navbar.php';
 
 // ===== SORT =====
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'id';
-$building_filter = isset($_GET['building']) ? $_GET['building'] : '';
+
+// 🔥 FIX QUAN TRỌNG: ép kiểu int
+$building_filter = isset($_GET['building']) ? (int)$_GET['building'] : 0;
 
 switch ($sort) {
     case 'room':
@@ -28,8 +30,8 @@ $start = ($page - 1) * $limit;
 
 // ===== WHERE FILTER =====
 $where = "";
-if ($building_filter != "") {
-    $where = "WHERE rooms.building_id = '$building_filter'";
+if ($building_filter > 0) {
+    $where = "WHERE rooms.building_id = $building_filter";
 }
 ?>
 <link rel="stylesheet" href="style.css">
@@ -77,9 +79,9 @@ if ($building_filter != "") {
                 <option value="">-- Tất cả dãy --</option>
                 <?php
                 $bld = mysqli_query($conn, "SELECT * FROM buildings");
-                while ($b = mysqli_fetch_assoc($bld)) {
-                    $selected = ($building_filter == $b['id']) ? "selected" : "";
-                    echo "<option value='{$b['id']}' $selected>{$b['name']}</option>";
+                while ($bld_row = mysqli_fetch_assoc($bld)) {
+                    $selected = ($building_filter == $bld_row['id']) ? "selected" : "";
+                    echo "<option value='{$bld_row['id']}' $selected>{$bld_row['name']}</option>";
                 }
                 ?>
             </select>
@@ -125,16 +127,15 @@ if ($building_filter != "") {
                 ?>
             </tbody>
 
-            //tổng tất cả
             <tfoot>
                 <?php
-                if ($building_filter != "") {
+                if ($building_filter > 0) {
                     $totalQuery = mysqli_query($conn, "
-            SELECT COUNT(*) 
-            FROM bookings 
-            JOIN rooms ON bookings.room_id = rooms.id
-            WHERE rooms.building_id = '$building_filter'
-        ");
+                        SELECT COUNT(*) 
+                        FROM bookings 
+                        JOIN rooms ON bookings.room_id = rooms.id
+                        WHERE rooms.building_id = $building_filter
+                    ");
                 } else {
                     $totalQuery = mysqli_query($conn, "SELECT COUNT(*) FROM bookings");
                 }
@@ -167,9 +168,9 @@ if ($building_filter != "") {
                     <option value="">Tất cả dãy</option>
                     <?php
                     $bld = mysqli_query($conn, "SELECT * FROM buildings");
-                    while ($b = mysqli_fetch_assoc($bld)) {
-                        $selected = ($building_filter == $b['id']) ? "selected" : "";
-                        echo "<option value='{$b['id']}' $selected>{$b['name']}</option>";
+                    while ($bld_row = mysqli_fetch_assoc($bld)) {
+                        $selected = ($building_filter == $bld_row['id']) ? "selected" : "";
+                        echo "<option value='{$bld_row['id']}' $selected>{$bld_row['name']}</option>";
                     }
                     ?>
                 </select>
@@ -225,12 +226,13 @@ if ($building_filter != "") {
         <!-- PAGINATION -->
         <div class="text-center mt-3">
             <?php
-            //tổng 
-            if ($building_filter != "") {
-                $totalQuery = mysqli_query($conn, "SELECT COUNT(*) 
-                                                   FROM bookings 
-                                                   JOIN rooms ON bookings.room_id = rooms.id
-                                                   WHERE rooms.building_id = '$building_filter'");
+            if ($building_filter > 0) {
+                $totalQuery = mysqli_query($conn, "
+                    SELECT COUNT(*) 
+                    FROM bookings 
+                    JOIN rooms ON bookings.room_id = rooms.id
+                    WHERE rooms.building_id = $building_filter
+                ");
             } else {
                 $totalQuery = mysqli_query($conn, "SELECT COUNT(*) FROM bookings");
             }

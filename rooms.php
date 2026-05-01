@@ -133,7 +133,7 @@ include 'navbar.php';
 
                 <input list="buildingList" name="building_name"
                     class="form-control mb-2"
-                    placeholder="Nhập hoặc chọn tòa (vd: D1)">
+                    placeholder="Nhập hoặc chọn tòa (vd: A1)">
 
                 <datalist id="buildingList">
                     <?php
