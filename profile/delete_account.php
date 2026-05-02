@@ -1,5 +1,5 @@
 <?php
-include '../config.php';
+include __DIR__ . '/../config.php';
 include '../session.php';
 
 if (!isset($_SESSION['user'])) {
