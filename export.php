@@ -4,7 +4,7 @@ include 'config.php';
 // ===== LẤY FILTER DÃY =====
 $building = isset($_GET['building']) ? $_GET['building'] : '';
 
-// ===== EXPORT EXCEL =====
+// ===== EXPORT EXCEL attachment → bắt tải xuống filename=... → tên file Excel khi tải về
 header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 header("Content-Disposition: attachment; filename=booking_report.xls");
 
@@ -12,7 +12,7 @@ header("Content-Disposition: attachment; filename=booking_report.xls");
 echo "\xEF\xBB\xBF";
 echo "<meta charset='UTF-8'>";
 
-// ===== TITLE =====
+// Tiêu đề
 echo "<h2 style='text-align:center;'>THỐNG KÊ ĐẶT PHÒNG</h2>";
 
 // ===== TABLE HEADER =====
@@ -33,13 +33,13 @@ echo "
 </tr>
 ";
 
-// ===== WHERE =====
+// có đk lọc thì lọc
 $where = "";
 if ($building != "") {
     $where = "WHERE rooms.building_id = '$building'";
 }
 
-// ===== QUERY (THÊM buildings) =====
+//truy vấn sql xếp tăng dần theo id
 $sql = "
 SELECT 
     bookings.id,
@@ -69,7 +69,7 @@ if (!$result) {
 
 $total = 0;
 
-// ===== DATA =====
+// x lí d liệu ghép tg r in
 while ($row = mysqli_fetch_assoc($result)) {
 
     $time = $row['time_start'] . " - " . $row['time_end'];

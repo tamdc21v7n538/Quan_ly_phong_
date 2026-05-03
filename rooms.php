@@ -2,7 +2,9 @@
 include 'config.php';
 
 // ===== PHÂN TRANG =====
+//10 dòng 1 trang
 $limit = 10;
+//lấy dl URL isset ktra có tham số k mặc định là trang 1
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
@@ -14,21 +16,24 @@ $start_his = ($page_his - 1) * $limit_his;
 
 // ===== THÊM PHÒNG =====
 if (isset($_POST['add'])) {
-
+    //trim bỏ khoảng trắng lấy tên phòng
     $name = trim($_POST['name']);
     $capacity = trim($_POST['capacity']);
     $building_name = trim($_POST['building_name']);
 
+    // ktra rỗng
     if ($name == "" || $capacity == "" || $building_name == "") {
         echo "<script>alert('Vui lòng nhập đầy đủ thông tin!');history.back();</script>";
         exit;
     }
 
+    //sức chứa là số
     if (!is_numeric($capacity)) {
         echo "<script>alert('Sức chứa phải là số!');history.back();</script>";
         exit;
     }
 
+    //tìm tòa học nếu có thì tồn tại chưa thì thêm tòa
     $check = mysqli_query($conn, "SELECT id FROM buildings WHERE name='$building_name'");
 
     if (mysqli_num_rows($check) > 0) {
@@ -36,12 +41,15 @@ if (isset($_POST['add'])) {
         $building_id = $row['id'];
     } else {
         mysqli_query($conn, "INSERT INTO buildings(name) VALUES('$building_name')");
+        //lấy id vừa thêm 
         $building_id = mysqli_insert_id($conn);
     }
 
+    //them db
     mysqli_query($conn, "INSERT INTO rooms(name,capacity,building_id) 
                          VALUES('$name','$capacity','$building_id')");
 
+    //lưu lịch sử
     mysqli_query($conn, "INSERT INTO room_logs(action,room_name,building_id) 
                          VALUES('Thêm','$name','$building_id')");
 
@@ -91,6 +99,7 @@ if (isset($_POST['update'])) {
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
 
+    //lấy dl trc xóa
     $r = mysqli_fetch_assoc(mysqli_query($conn, "
         SELECT name, building_id FROM rooms WHERE id=$id
     "));
@@ -99,6 +108,7 @@ if (isset($_GET['delete'])) {
 
     mysqli_query($conn, "DELETE FROM rooms WHERE id=$id");
 
+    // lưu lsu xóa
     mysqli_query($conn, "INSERT INTO room_logs(action,room_name,building_id) 
                          VALUES('Xóa','$name','$building_id')");
 
@@ -130,7 +140,7 @@ include 'navbar.php';
             </h4>
 
             <form method="POST">
-
+                <!--input gợi ý-->
                 <input list="buildingList" name="building_name"
                     class="form-control mb-2"
                     placeholder="Nhập hoặc chọn tòa (vd: A1)">
@@ -191,7 +201,7 @@ include 'navbar.php';
             <tbody id="roomTable">
                 <?php
                 $stt = $start + 1;
-
+                //LIMIT $start, $limit phân trang
                 $res = mysqli_query($conn, "
                 SELECT rooms.*, buildings.name AS building_name
                 FROM rooms
@@ -230,6 +240,7 @@ include 'navbar.php';
 
         <!-- ===== PHÂN TRANG ===== -->
         <?php
+        // đếm tổng
         $total = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM rooms"))['total'];
         $pages = ceil($total / $limit);
         ?>
@@ -250,6 +261,7 @@ include 'navbar.php';
         <h5 class="text-center text-warning">Sửa phòng</h5>
 
         <form method="POST">
+            // ẩn id
             <input type="hidden" name="id" id="edit_id">
 
             <input list="buildingList" name="building_name" id="edit_building"

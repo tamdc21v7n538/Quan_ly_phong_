@@ -2,68 +2,73 @@
 include 'config.php';
 include 'session.php';
 
-// ===== KIỂM TRA LOGIN =====
+//  KIỂM TRA LOGIN, chưa  
 if (!isset($_SESSION['user'])) {
     header("location: login.php");
     exit;
 }
 
-// ===== KIỂM TRA QUYỀN =====
+// KIỂM TRA QUYỀN 
 if ($_SESSION['role'] != 'admin') {
     die("❌ Không có quyền!");
 }
 
-// ===== XỬ LÝ FORM =====
+// XỬ LÝ FORM  bấm nút tạo tk
 if (isset($_POST['register'])) {
-
+    //lấy email safe lọc dl
     $email = safe($_POST['email']);
+    //mã hóa pass
     $pass = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    //lấy quyền
     $role = $_POST['role'];
 
     // 👉 class chỉ cần khi là user
     $class = isset($_POST['class']) ? safe($_POST['class']) : '';
 
-    // ===== CHECK EMAIL =====
+    //  CHECK EMAIL tránh trùng
     $check = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'");
-
+    //nếu đã tồn tại- báo lỗi
     if (mysqli_num_rows($check) > 0) {
         header("Location: register.php?error=exists");
         exit;
     }
 
-    // ===== NẾU USER → CHECK LỚP =====
+    //NẾU USER → CHECK LỚP 
     if ($role == 'user') {
 
+        //bắt buộc chọn lớp
         if (empty($class)) {
             header("Location: register.php?error=noclass");
             exit;
         }
-
+        //Ktra lớp có tồn tại
         $checkClass = mysqli_query($conn, "
             SELECT DISTINCT class 
             FROM bookings 
             WHERE class = '$class'
         ");
 
+        //lớp không hợp lệ
         if (mysqli_num_rows($checkClass) == 0) {
             header("Location: register.php?error=invalidclass");
             exit;
         }
 
-        // INSERT USER + CLASS
+        // lưu USER + CLASS
         $result = mysqli_query($conn, "
             INSERT INTO users(email,password,role,class) 
             VALUES('$email','$pass','$role','$class')
         ");
     } else {
 
-        // 👉 ADMIN KHÔNG CẦN CLASS
+        // admin không cần lớp
         $result = mysqli_query($conn, "
             INSERT INTO users(email,password,role) 
             VALUES('$email','$pass','$role')
         ");
     }
 
+    //insert thành công
     if ($result) {
         header("Location: register.php?success=1");
         exit;
@@ -83,24 +88,13 @@ include 'navbar.php';
 
 <head>
     <meta charset="UTF-8">
-    <title>Tạo tài khoản</title>
+    <title">Tạo tài khoản</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        body {
-            background: #f1f3f6;
-        }
 
-        .card {
-            border-radius: 15px;
-        }
+        <link rel="stylesheet" href="style.css">
 
-        .title {
-            color: #0d6efd;
-            font-weight: bold;
-        }
-    </style>
 </head>
 
 <body>
@@ -108,7 +102,7 @@ include 'navbar.php';
     <div class="container mt-5 col-md-5">
         <div class="card p-4 shadow">
 
-            <h3 class="text-center title mb-3">👤 Tạo tài khoản</h3>
+            <h3 class="text-center text-primary mb-3">👤 Tạo tài khoản</h3>
 
             <!-- THÔNG BÁO -->
             <?php if (isset($_GET['success'])) { ?>

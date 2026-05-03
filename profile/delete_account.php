@@ -9,10 +9,10 @@ if (!isset($_SESSION['user'])) {
 
 $email = $_SESSION['user'];
 
-// xóa bằng prepared statement
+// xóa bằng prepared statement tạo câu SQL xóa user
 $stmt = $conn->prepare("DELETE FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
-
+// nếu lệnh sql chạy thành công
 if ($stmt->execute()) {
 
     session_destroy();

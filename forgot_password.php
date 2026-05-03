@@ -26,6 +26,7 @@ if (isset($_POST['reset'])) {
         $subject = "Khôi phục mật khẩu";
         $body = "Mật khẩu mới của bạn là: <b>$newPass</b>";
 
+        //gọi sendMail trog mail_helper.php
         if (sendMail($email, $subject, $body)) {
             $success = true;
         } else {

@@ -5,13 +5,14 @@
 <div class="container mt-4">
     <h3 class="text-center main-title ">Biểu đồ thống kê số lượt đặt phòng</h3>
 
-    <!-- ===== FILTER ===== -->
+    <!-- LỌC DỮ LIỆU submit dl nằm trong $GET -->
     <form method="GET" class="row mb-3 text-center">
         <div class="col-md-3">
             <select name="building" class="form-control">
                 <option value="">-- Tất cả dãy --</option>
                 <?php
                 $b = mysqli_query($conn, "SELECT * FROM buildings");
+                //Lặp từng dãy, value gửi server hiển thị $row['name']
                 while ($row = mysqli_fetch_assoc($b)) {
                     $selected = (isset($_GET['building']) && $_GET['building'] == $row['id']) ? "selected" : "";
                     echo "<option value='{$row['id']}' $selected>{$row['name']}</option>";
@@ -41,9 +42,7 @@
 </div>
 
 <?php
-/* =====================
-   FILTER CHUNG
-===================== */
+
 $where = [];
 
 if (!empty($_GET['from'])) {
@@ -66,9 +65,9 @@ if (!empty($building_id)) {
 
     // 👉 CHỌN 1 DÃY → CHỈ PHÒNG TRONG DÃY ĐÓ
     $where[] = "rooms.building_id = " . (int)$building_id;
-
+    //count($where) → có điều kiện không implode → nối mảng
     $whereSQL = count($where) ? "WHERE " . implode(" AND ", $where) : "";
-
+    //LEFT JOIN → giữ cả phòng chưa có booking
     $sql = "SELECT rooms.name, COUNT(bookings.id) AS total
             FROM rooms
             LEFT JOIN bookings ON rooms.id = bookings.room_id
@@ -86,9 +85,9 @@ if (!empty($building_id)) {
             $whereSQL
             GROUP BY buildings.id";
 }
-
+//chạy query
 $result = mysqli_query($conn, $sql);
-
+//tạo data biểu đồ
 $labels = [];
 $values = [];
 
@@ -99,12 +98,13 @@ if ($result) {
     }
 }
 ?>
-
+//load thư viện chart.js
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    //lấy canvas
     const ctx = document.getElementById("c");
-
+    //tạo biểu đồ, bar biểu đồ cột
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -137,6 +137,7 @@ if ($result) {
             },
             scales: {
                 y: {
+                    //trục Y từ 0
                     beginAtZero: true,
                     ticks: {
                         precision: 0

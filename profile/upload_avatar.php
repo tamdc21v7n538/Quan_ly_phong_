@@ -20,7 +20,7 @@ if ($file['error'] != 0) {
     die("Upload lỗi");
 }
 
-// tạo tên file
+// lấy tên file
 $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
 $newName = uniqid() . "." . $ext;
 
@@ -30,10 +30,10 @@ if (!is_dir($dir)) {
     mkdir($dir, 0777, true);
 }
 
-// move file
+// lưu file
 move_uploaded_file($file['tmp_name'], $dir . $newName);
 
-// update DB
+// update DB dùng prepared → chống SQL injection
 $stmt = $conn->prepare("UPDATE users SET avatar=? WHERE email=?");
 $stmt->bind_param("ss", $newName, $email);
 $stmt->execute();

@@ -3,14 +3,16 @@
 include 'config.php';
 
 
-/* =========================
-   CHECK INPUT
-========================= */
+/* 
+   CHECK INPUT 
+ */
+//lấy room_id ...
 $r = $_POST['room'] ?? null;
 $d = $_POST['date'] ?? null;
 $s = $_POST['start'] ?? null;
 $e = $_POST['end'] ?? null;
 
+//mặc định
 $user = $_POST['user_name'] ?? '';
 $students = $_POST['students'] ?? 0;
 $purpose = $_POST['purpose'] ?? '';
@@ -24,9 +26,10 @@ if (!$r || !$d || !$s || !$e) {
 }
 
 
-/* =========================
+/* 
    CHECK TRÙNG GIỜ
-========================= */
+*/
+//lọc cùng ngày cùng giờ chống trùng
 $check = mysqli_query($conn, "
     SELECT * FROM bookings 
     WHERE room_id = '$r' 
@@ -37,15 +40,15 @@ $check = mysqli_query($conn, "
 if (!$check) {
     die("Query lỗi: " . mysqli_error($conn));
 }
-
+//có dl báo trùng
 if (mysqli_num_rows($check) > 0) {
     echo "Trùng giờ!";
     exit;
 }
 
-/* =========================
+/* 
    INSERT BOOKING
-========================= */
+ */
 $sql = "
 INSERT INTO bookings (
     room_id,

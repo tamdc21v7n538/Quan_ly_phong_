@@ -4,6 +4,7 @@ session_start();
 
 function safe($data)
 {
+    //nối với PHP
     global $conn;
     return mysqli_real_escape_string($conn, $data);
 }

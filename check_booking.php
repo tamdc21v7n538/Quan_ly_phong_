@@ -1,20 +1,19 @@
 <?php
-// ===== HEADER JSON =====
+// trả json tvieetj
 header('Content-Type: application/json; charset=utf-8');
 
-// ===== INCLUDE DB =====
 require_once 'config.php';
 
-// ===== SET UTF8 =====
+// sửa lỗi dấu
 mysqli_set_charset($conn, "utf8");
 
-// ===== LẤY DATA (AN TOÀN) =====
+// lấy dl từ ajax
 $room  = $_POST['room']  ?? null;
 $date  = $_POST['date']  ?? null;
 $start = $_POST['start'] ?? null;
 $end   = $_POST['end']   ?? null;
 
-// ===== VALIDATE =====
+// ktra thíu dl, trả js
 if (!$room || !$date || !$start || !$end) {
     echo json_encode([
         "status" => "error",
@@ -23,20 +22,21 @@ if (!$room || !$date || !$start || !$end) {
     exit;
 }
 
-// ===== PREPARED STATEMENT (CHỐNG SQL INJECTION) =====
+// placeholder CHỐNG SQL INJECTION
 $stmt = $conn->prepare("
     SELECT id FROM bookings 
     WHERE room_id = ? 
     AND date = ?
     AND (time_start < ? AND time_end > ?)
 ");
-
+//ssss 4 biến đều là string truyền dl an toàn vào SQL
 $stmt->bind_param("ssss", $room, $date, $end, $start);
 $stmt->execute();
 
+//lấy kq
 $result = $stmt->get_result();
 
-// ===== TRẢ KẾT QUẢ =====
+// trả kq
 if ($result->num_rows > 0) {
     echo json_encode([
         "status" => "exist",
@@ -49,6 +49,6 @@ if ($result->num_rows > 0) {
     ], JSON_UNESCAPED_UNICODE);
 }
 
-// ===== CLOSE =====
+// đóng kết nối
 $stmt->close();
 mysqli_close($conn);

@@ -7,6 +7,8 @@
     <div class="card p-4 shadow-lg fade-in">
         <h3 class="text-center fw-bold mb-4 text-info">🚀 Đặt phòng </h3>
 
+        <!--id="form" → JS sử dụng POST → gửi dữ liệu novalidate → tắt validate HTML (để JS xử lý)-->
+
         <form id="form" method="POST" novalidate>
 
             <div class="input-group mb-2">
@@ -15,6 +17,7 @@
             </div>
 
             <div class="input-group mb-2">
+                <!--list → dùng datalist gợi ý-->
                 <span class="input-group-text">🏷️</span>
                 <input list="classList" name="class" id="class" class="form-control" placeholder="Nhập hoặc chọn lớp" required>
 
@@ -45,10 +48,12 @@
             <!-- ===== PHÒNG (GIỮ NGUYÊN + THÊM data-building) ===== -->
             <div class="input-group mb-2">
                 <span class="input-group-text">🏫</span>
+                <!--disabled → chưa chọn dãy thì không chọn phòng-->
                 <select name="room" id="room" class="form-control" required disabled>
-                    <option value="">-- Chọn dãy trước --</option>
+                    <option value="">-- Chọn phòng (chọn dãy trước) --</option>
                     <?php
                     $res = mysqli_query($conn, "SELECT * FROM rooms");
+                    //data-cap → sức chứa, data-building → thuộc dãy nào
                     while ($r = mysqli_fetch_assoc($res)) {
                         echo "<option value='{$r['id']}' 
                               data-cap='{$r['capacity']}'
@@ -95,6 +100,7 @@
         </form>
 
         <div id="preview" class="mt-3" style="display:none;">
+            <!--JS đưa dl vào xem trc booking-->
             <div class="alert fade-in">
                 📌 <b>Thông tin:</b><br>
                 Phòng: <span id="p_room"></span><br>
@@ -103,12 +109,16 @@
             </div>
         </div>
 
+        //AI gợi ý đặt phòng, khung gợi ý
         <div id="suggest" class="mt-2"></div>
+
+        // hiển thị lịch phòng
         <div id="calendarBox" class="mt-3"></div>
+        // hiển thị thông báo
         <div id="msg"></div>
     </div>
 
-    <!-- ===== LỊCH SỬ (GIỮ NGUYÊN) ===== -->
+    <!-- ===== LỊCH SỬ ===== -->
     <div class="text-center mt-4">
         <button class="btn btn-warning" onclick="toggleHistory()">
             📜 Xem lịch sử đặt phòng
@@ -117,6 +127,7 @@
 
     <div id="historyBox" style="display:none;" class="mt-4">
 
+        <!--Lọc lịch sử-->
         <div class="row mb-3">
             <div class="col">
                 <input type="date" id="filterDate" class="form-control">
@@ -155,6 +166,7 @@
         for (let opt of room.options) {
             if (!opt.value) continue;
 
+            //opt.dataset.building === val chỉ hiện phòng thuộc dãy
             opt.style.display = (opt.dataset.building === val) ? "block" : "none";
         }
     });
@@ -162,6 +174,8 @@
     document.querySelectorAll("#form input, #form select").forEach(el => {
         el.addEventListener("change", showPreview);
     });
+
+    //Hiển thị preview
 
     function showPreview() {
         let start = document.getElementById("start").value;
@@ -190,15 +204,20 @@
 
     }
 
-    // ===== GỢI Ý (KHÔNG PHÁ CODE) =====
+    // ===== GỢI Ý =====
+    //Bắt sự kiện khi bạn gõ vào ô “số lượng người”
     document.getElementById("students").addEventListener("input", function() {
+
+        //Lấy số người bạn vừa nhập
         let students = this.value;
         let best = "";
 
+        //Lặp qua tất cả <option> trong <select phòng>
         for (let opt of room.options) {
             if (opt.style.display === "none") continue;
 
             let cap = opt.dataset.cap;
+            //best = opt.text; dòng đầu tiên phù hợp
             if (students <= cap) {
                 best = opt.text;
                 break;
@@ -209,7 +228,7 @@
             best ? `<div class="alert alert-success">💡 Gợi ý: ${best}</div>` : "";
     });
 
-    // ===== GIỮ NGUYÊN TOÀN BỘ AJAX =====
+    // ===== Lịch =====
     document.getElementById("date").addEventListener("change", function() {
         fetch("calendar_ajax.php?date=" + this.value)
             .then(r => r.text())
@@ -244,6 +263,7 @@
             return;
         }
 
+        //check trùng
         fetch("check_booking.php", {
                 method: "POST",
                 body: data
@@ -258,6 +278,7 @@
                 btn.disabled = true;
                 btn.innerText = "Đang xử lý...";
 
+                //lưu db
                 fetch("book_ajax.php", {
                         method: "POST",
                         body: data
@@ -279,10 +300,12 @@
             });
     }
 
+    //hiển thị tb
     function show(msg, type) {
         document.getElementById("msg").innerHTML =
             `<div class="alert alert-${type} mt-2">${msg}</div>`;
     }
+
 
     function toggleHistory() {
         let box = document.getElementById("historyBox");
@@ -295,6 +318,7 @@
         }
     }
 
+    //gọi ajax
     function loadHistory(page) {
         let date = document.getElementById("filterDate").value;
         let name = document.getElementById("searchName").value;

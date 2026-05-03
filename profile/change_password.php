@@ -15,7 +15,7 @@ if (isset($_POST['submit'])) {
     $old = $_POST['old'];
     $new = $_POST['new'];
 
-    // lấy user theo email
+    // lấy user theo email (chống SQL injection)
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
